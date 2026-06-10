@@ -40,12 +40,22 @@
 
 > 桌面版本机单用户、**免登录**；数据存于 `~/Library/Application Support/Claworld Monitor/`。
 
-### 方式二：源码运行（开发者 / 部署到服务器）
+### 方式二：一键脚本（Mac / Windows，免敲命令）
+下载本项目后，在文件管理器里**双击**：
+- **Mac**：`run.command`
+- **Windows**：`run.bat`
+
+会自动建虚拟环境、装依赖、起服务并打开浏览器。（前提：已装 [Python 3](https://www.python.org/downloads/)；Win 安装时勾选 "Add to PATH"。）
+
+### 方式三：源码运行（开发者 / 部署到服务器）
 ```bash
 pip3 install -r requirements.txt
 python3 start.py            # http://localhost:5001
 ```
 首次启动控制台会打印**默认登录密码**（也写入 `data/default_password.txt`）；登录后到**设置**页填写各项。
+
+### 方式四：让 AI Agent 帮你装（Skill）
+把 `skill/claworld-monitor` 文件夹拷到 `~/.claude/skills/`，然后对 Claude Code 说「帮我部署 Claworld 财经监控」，Agent 会带你 clone、装依赖、配 API、跑起来（Mac/Win/Linux 通用）。
 
 ### 🔨 自行构建 Mac .app
 ```bash
