@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% set st = tweet.stocks or {} %}
+{% set ai = tweet.ai or {} %}
+{% block content %}
+<a href="{{ url_for('index') }}" class="btn btn-sm btn-outline-secondary mb-3">← 返回</a>
+<div class="card shadow-sm {{ 'tw-card hit' if st.hit }}">
+  <div class="card-body">
+    <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+      <strong>@{{ tweet.author }}</strong>
+      {% if tweet.is_reply %}<span class="chip chip-reply">↩ 回复</span>{% else %}<span class="chip chip-post">推文</span>{% endif %}
+      <span class="muted">{{ tweet.created_at }} · 北京 {{ tweet.created_at|beijing }}</span>
+      <div class="ms-auto d-flex gap-1 flex-shrink-0">
+        {% if is_admin %}<button id="btn-push" class="btn btn-sm btn-outline-success">📤 推到飞书</button>{% endif %}
+        {% if tweet.url %}<a class="btn btn-sm btn-outline-secondary" href="{{ tweet.url }}" target="_blank">↗ 在 X 查看原文</a>{% endif %}
+      </div>
+    </div>
+
+    {% if st.ashare or st.us %}
+    <div class="alert {{ 'alert-danger' if st.ashare else 'alert-primary' }} py-2">
+      {% if st.ashare %}<div><strong>🅰️ A股点名：</strong>
+        {% for a in st.ashare %}<span class="chip chip-a me-1">{{ a.code }} {{ a.name }}（{{ a.via }}）</span>{% endfor %}
+      </div>{% endif %}
+      {% if st.us %}<div class="mt-1"><strong>🇺🇸 美股：</strong>
+        {% for u in st.us %}<span class="chip chip-us me-1">${{ u }}</span>{% endfor %}
+      </div>{% endif %}
+      {% if st.ashare %}<div class="muted mt-1">⚠️ 仅信息提示，非投资建议，请自行判断与风控。</div>{% endif %}
+    </div>
+    {% endif %}
+
+    {% if ai.title %}<h5>{{ ai.title }}</h5>{% endif %}
+
+    <div class="mb-2"><span class="badge bg-secondary">原文</span>
+      <pre class="body mt-1">{{ tweet.text }}</pre></div>
+    {% if ai.zh %}<div class="mb-2"><span class="badge bg-danger">🇨🇳 中文</span>
+      <pre class="body mt-1">{{ ai.zh }}</pre></div>{% endif %}
+    {% if ai.analysis %}<div class="mb-2"><span class="badge bg-dark">📊 解读</span>
+      <pre class="body mt-1">{{ ai.analysis }}</pre></div>{% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if is_admin %}
+<script>
+var _pb=document.getElementById('btn-push');
+if(_pb) _pb.onclick=async()=>{
+  _pb.disabled=true; _pb.textContent='推送中…';
+  try{ const r=await fetch('{{ url_for("api_push", tweet_id=tweet.id) }}',{method:'POST'}); const j=await r.json(); alert(j.msg||''); }
+  catch(e){ alert('推送出错'); }
+  _pb.disabled=false; _pb.textContent='📤 推到飞书';
+};
+</script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block content %}
+{% if profiles %}
+<ul class="nav nav-pills flex-wrap gap-1 mb-3">
+  <li class="nav-item">
+    <a class="nav-link {{ 'active' if not author }}" href="{{ url_for('index', stock=('1' if only_stock else none)) }}">🔀 交叉·全部</a>
+  </li>
+  {% for u, p in profiles.items() %}
+  <li class="nav-item">
+    <a class="nav-link d-flex align-items-center gap-2 {{ 'active' if author|lower == u|lower }}" href="{{ url_for('index', author=u, stock=('1' if only_stock else none)) }}">
+      {% if p.avatar %}<img src="{{ p.avatar }}" width="22" height="22" class="rounded-circle">{% endif %}
+      <span>{{ p.name or u }}</span>
+    </a>
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}
+<div class="row mb-3">
+  {% if is_admin %}
+  <div class="col-md-8">
+    <div class="card shadow-sm">
+      <div class="card-body d-flex align-items-center flex-wrap gap-3">
+        <div>
+          <span class="dot {{ 'dot-on' if status.running else 'dot-off' }}"></span>
+          <strong>{{ status.current_status }}</strong>
+          {% if status.current_account %}<span class="muted">@{{ status.current_account }}</span>{% endif %}
+        </div>
+        <div class="muted">已处理 {{ status.processed_tweets }} 条 · A股白名单 {{ screener_size }} 只 · 更新 {{ status.last_update|beijing }}</div>
+        <div class="ms-auto">
+          <button id="btn-start" class="btn btn-sm btn-success">开始监控</button>
+          <button id="btn-stop" class="btn btn-sm btn-outline-danger">停止</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  <div class="{{ 'col-md-4' if is_admin else 'col-md-12' }}">
+    <form class="card shadow-sm h-100" method="get">
+      <input type="hidden" name="author" value="{{ author }}">
+      <div class="card-body d-flex gap-2 align-items-center justify-content-center">
+        <div class="form-check text-nowrap">
+          <input class="form-check-input" type="checkbox" name="stock" value="1" id="onlystock" {{ 'checked' if only_stock }} onchange="this.form.submit()">
+          <label class="form-check-label muted" for="onlystock">仅看命中股票</label>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% if not tweets %}
+  <div class="text-center text-muted py-5">暂无推文。配置好设置后点「开始监控」。</div>
+{% endif %}
+
+{% for t in tweets %}
+{% set st = t.stocks or {} %}
+<div class="card shadow-sm mb-2 tw-card {{ 'hit' if st.hit }}">
+  <div class="card-body">
+    <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+      <strong>@{{ t.author }}</strong>
+      {% if t.is_reply %}<span class="chip chip-reply">↩ 回复</span>{% else %}<span class="chip chip-post">推文</span>{% endif %}
+      <span class="muted">{{ t.created_at }} · 北京 {{ t.created_at|beijing }}</span>
+      <div class="ms-auto d-flex gap-1 flex-shrink-0">
+        {% if t.url %}<a class="btn btn-sm btn-outline-secondary" href="{{ t.url }}" target="_blank">↗ X</a>{% endif %}
+        <a class="btn btn-sm btn-outline-primary" href="{{ url_for('tweet_detail', tweet_id=t.id) }}">详情</a>
+      </div>
+    </div>
+    {% if st.ashare or st.us %}
+    <div class="d-flex flex-wrap gap-1 mb-2">
+      {% if st.ashare %}{% for a in st.ashare %}<span class="chip chip-a">🅰️ {{ a.code }} {{ a.name }}</span>{% endfor %}{% endif %}
+      {% if st.us %}{% for u in st.us %}<span class="chip chip-us">${{ u }}</span>{% endfor %}{% endif %}
+    </div>
+    {% endif %}
+    {% if t.ai and t.ai.title %}<div class="fw-semibold">{{ t.ai.title }}</div>{% endif %}
+    <pre class="body mt-1">{{ t.ai.zh if t.ai and t.ai.zh else t.text }}</pre>
+    {% if st.ashare %}<div class="muted mt-2">⚠️ 仅信息提示，非投资建议，请自行判断与风控。</div>{% endif %}
+  </div>
+</div>
+{% endfor %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function ctl(path){ const r = await fetch(path,{method:'POST'}); const j = await r.json(); alert(j.msg||''); location.reload(); }
+var _bs=document.getElementById('btn-start'); if(_bs) _bs.onclick=()=>ctl('/api/start');
+var _bt=document.getElementById('btn-stop'); if(_bt) _bt.onclick=()=>ctl('/api/stop');
+</script>
+{% endblock %}

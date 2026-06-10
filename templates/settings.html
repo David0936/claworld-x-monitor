@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block content %}
+<form method="post">
+<div class="row g-3">
+  <div class="col-md-6">
+    <div class="card shadow-sm h-100"><div class="card-body">
+      <h6 class="mb-3">数据源</h6>
+      <label class="form-label">twitterapi.io API Key</label>
+      <input name="TWITTER_API_KEY" class="form-control mb-3" value="{{ cfg.TWITTER_API_KEY }}">
+      <label class="form-label">监控账号（英文逗号分隔，不带 @）</label>
+      <input name="TARGET_ACCOUNTS" class="form-control mb-3" value="{{ cfg.TARGET_ACCOUNTS|join(',') }}">
+      <div class="row">
+        <div class="col"><label class="form-label">检查间隔(秒)</label>
+          <input name="CHECK_INTERVAL" type="number" min="15" class="form-control" value="{{ cfg.CHECK_INTERVAL }}"></div>
+        <div class="col"><label class="form-label">首轮回溯(小时)</label>
+          <input name="INITIAL_HOURS" type="number" class="form-control" value="{{ cfg.INITIAL_HOURS }}"></div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card shadow-sm h-100"><div class="card-body">
+      <h6 class="mb-3">AI 模型</h6>
+      <div class="form-check mb-2">
+        <input class="form-check-input" type="checkbox" name="AI_ENABLED" {{ 'checked' if cfg.AI_ENABLED }}>
+        <label class="form-check-label">开启 AI 处理（翻译/标题/解读）</label>
+      </div>
+      <div class="mb-2">
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="AI_PROVIDER" value="claude" {{ 'checked' if cfg.AI_PROVIDER=='claude' }}>
+          <label class="form-check-label">Claude</label></div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="AI_PROVIDER" value="openai" {{ 'checked' if cfg.AI_PROVIDER=='openai' }}>
+          <label class="form-check-label">通义千问 / OpenAI兼容</label></div>
+      </div>
+      <label class="form-label">Claude API Key</label>
+      <input name="CLAUDE_API_KEY" class="form-control mb-1" value="{{ cfg.CLAUDE_API_KEY }}">
+      <input name="CLAUDE_MODEL" class="form-control mb-3" value="{{ cfg.CLAUDE_MODEL }}" placeholder="claude-opus-4-8">
+      <label class="form-label">OpenAI兼容 URL / Key / Model</label>
+      <input name="LLM_URL" class="form-control mb-1" value="{{ cfg.LLM_URL }}">
+      <input name="LLM_API_KEY" class="form-control mb-1" value="{{ cfg.LLM_API_KEY }}">
+      <input name="LLM_MODEL" class="form-control" value="{{ cfg.LLM_MODEL }}" placeholder="qwen-plus">
+    </div></div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card shadow-sm h-100"><div class="card-body">
+      <h6 class="mb-1">飞书推送（多群）+ 股票秒筛</h6>
+      <div class="muted mb-2">可加多个飞书群，每个填<strong>备注</strong>区分；新推/命中会推送到所有群。</div>
+      <div id="bot-list">
+        {% set bots = cfg.FEISHU_BOTS or ([{'note':'默认','webhook':cfg.FEISHU_WEBHOOK,'secret':cfg.FEISHU_SECRET}] if cfg.FEISHU_WEBHOOK else []) %}
+        {% for b in bots %}
+        <div class="bot-row border rounded p-2 mb-2">
+          <div class="d-flex gap-2 mb-1">
+            <input name="bot_note" class="form-control form-control-sm" style="max-width:130px" placeholder="备注(如 主群)" value="{{ b.note }}">
+            <input name="bot_webhook" class="form-control form-control-sm" placeholder="飞书 Webhook 地址" value="{{ b.webhook }}">
+            <button type="button" class="btn btn-sm btn-outline-danger flex-shrink-0" onclick="this.closest('.bot-row').remove()">×</button>
+          </div>
+          <input name="bot_secret" class="form-control form-control-sm mb-2" placeholder="签名密钥(可选，没开签名校验就留空)" value="{{ b.secret }}">
+          <div class="muted small mb-1">这个机器人推送哪些博主（不勾=全部）：</div>
+          <input type="hidden" name="bot_accounts" value="{{ (b.accounts or [])|join(',') }}">
+          <div class="d-flex flex-wrap gap-2">
+            {% for u in cfg.TARGET_ACCOUNTS %}
+            <label class="form-check-label small border rounded px-2 py-1">
+              <input type="checkbox" class="bot-acct" value="{{ u }}" {{ 'checked' if u in (b.accounts or []) }} onchange="syncAccts(this)">
+              {{ (cfg.PROFILES.get(u) or {}).get('name') or u }}
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <button type="button" class="btn btn-sm btn-outline-primary mb-3" onclick="addBot()">+ 添加飞书群</button>
+      <label class="form-label">看板地址（飞书卡片按钮 / SITE_URL，可选）</label>
+      <input name="SITE_URL" class="form-control mb-3" value="{{ cfg.SITE_URL }}">
+      <div class="muted">A股白名单已加载 <strong>{{ screener_size }}</strong> 只；命中股票的推文会红色置顶推送。
+        刷新白名单：<code>python3 scripts/build-ashares.py</code></div>
+    </div></div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card shadow-sm h-100"><div class="card-body">
+      <h6 class="mb-3">账号安全</h6>
+      <label class="form-label">设置新登录密码（留空则不改）</label>
+      <input name="NEW_PASSWORD" class="form-control mb-3" placeholder="••••••">
+      <div class="muted">监控状态：{{ '运行中' if status.running else '已停止' }}。改完设置请到信息流页停止再开始以生效。</div>
+    </div></div>
+  </div>
+</div>
+<button class="btn btn-primary mt-3">保存设置</button>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+var MON_ACCOUNTS = [{% for u in cfg.TARGET_ACCOUNTS %}{h:{{ u|tojson }}, n:{{ ((cfg.PROFILES.get(u) or {}).get('name') or u)|tojson }}}{{ ',' if not loop.last }}{% endfor %}];
+function syncAccts(cb){
+  var row=cb.closest('.bot-row');
+  var vals=[].slice.call(row.querySelectorAll('.bot-acct:checked')).map(function(x){return x.value;});
+  row.querySelector('input[name="bot_accounts"]').value=vals.join(',');
+}
+function addBot(){
+  var row=document.createElement('div');
+  row.className='bot-row border rounded p-2 mb-2';
+  var boxes=MON_ACCOUNTS.map(function(a){
+    return '<label class="form-check-label small border rounded px-2 py-1"><input type="checkbox" class="bot-acct" value="'+a.h+'" onchange="syncAccts(this)"> '+a.n+'</label>';
+  }).join('');
+  row.innerHTML=''
+    +'<div class="d-flex gap-2 mb-1">'
+    +'<input name="bot_note" class="form-control form-control-sm" style="max-width:130px" placeholder="备注(如 主群)">'
+    +'<input name="bot_webhook" class="form-control form-control-sm" placeholder="飞书 Webhook 地址">'
+    +'<button type="button" class="btn btn-sm btn-outline-danger flex-shrink-0" onclick="this.closest(\'.bot-row\').remove()">×</button>'
+    +'</div>'
+    +'<input name="bot_secret" class="form-control form-control-sm mb-2" placeholder="签名密钥(可选)">'
+    +'<div class="muted small mb-1">这个机器人推送哪些博主（不勾=全部）：</div>'
+    +'<input type="hidden" name="bot_accounts" value="">'
+    +'<div class="d-flex flex-wrap gap-2">'+boxes+'</div>';
+  document.getElementById('bot-list').appendChild(row);
+}
+</script>
+{% endblock %}

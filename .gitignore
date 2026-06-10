@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+config.json
+data/tweets.json
+data/tweets.json.tmp
+data/default_password.txt
+.venv/
+venv/

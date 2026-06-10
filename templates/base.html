@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}CLAWORLD · 财经推文监控{% endblock %}</title>
+  <link rel="icon" href="{{ url_for('static', filename='claw-icon.png') }}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background: #f6f7f9; }
+    .chip { display:inline-block; padding:2px 8px; border-radius:999px; font-size:12px; font-weight:600; }
+    .chip-a { background:#fee2e2; color:#b91c1c; border:1px solid #fecaca; }
+    .chip-us { background:#dbeafe; color:#1d4ed8; border:1px solid #bfdbfe; }
+    .chip-sub { background:#f3e8ff; color:#7e22ce; border:1px solid #e9d5ff; }
+    .tw-card.sub { border-left:4px solid #a855f7; }
+    .chip-reply { background:#fef3c7; color:#92400e; border:1px solid #fde68a; }
+    .chip-post { background:#e5e7eb; color:#374151; border:1px solid #d1d5db; }
+    .navbar-nav .nav-link.active { color:#fff !important; font-weight:600; border-bottom:2px solid #6ea8fe; }
+    .tw-card.hit { border-left:4px solid #dc2626; }
+    .muted { color:#64748b; font-size:12px; }
+    .dot { width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:6px; }
+    .dot-on{background:#16a34a;} .dot-off{background:#cbd5e1;}
+    pre.body { white-space:pre-wrap; font-family:inherit; margin:0; }
+  </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('index') }}">
+      <img src="{{ url_for('static', filename='claworld-light.png') }}" alt="CLAWORLD" height="22">
+      <span class="muted text-light">· 财经监控</span>
+    </a>
+    <div class="navbar-nav me-auto">
+      <a class="nav-link {{ 'active' if request.endpoint == 'index' }}" href="{{ url_for('index') }}">实时推文</a>
+      {% if session.get('auth') %}<a class="nav-link {{ 'active' if request.endpoint == 'settings' }}" href="{{ url_for('settings') }}">设置</a>{% endif %}
+    </div>
+    {% if session.get('auth') %}
+    <span class="navbar-text text-light me-3">
+      <span class="dot {{ 'dot-on' if status and status.running else 'dot-off' }}"></span>
+      {{ '监控中' if status and status.running else '已停止' }}
+    </span>
+    <a class="btn btn-sm btn-outline-light" href="{{ url_for('logout') }}">退出</a>
+    {% else %}
+    <a class="btn btn-sm btn-outline-light" href="{{ url_for('login') }}">管理员登录</a>
+    {% endif %}
+  </div>
+</nav>
+<div class="container py-4">
+  {% with msgs = get_flashed_messages() %}
+    {% if msgs %}{% for m in msgs %}<div class="alert alert-info py-2">{{ m }}</div>{% endfor %}{% endif %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

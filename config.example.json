@@ -1,0 +1,25 @@
+{
+  "_说明": "首次运行会自动生成 config.json（本文件仅作字段参考）。实际配置请登录后在【设置】页面填写，无需手改 JSON。",
+
+  "TWITTER_API_KEY": "在 https://twitterapi.io 注册并充值后获取（X 数据源，必填）",
+
+  "AI_ENABLED": true,
+  "AI_PROVIDER": "openai  (二选一: 'claude' 走 Anthropic 官方 | 'openai' 走 OpenAI 兼容接口/通义千问/中转站)",
+  "CLAUDE_API_KEY": "AI_PROVIDER=claude 时填，来自 https://console.anthropic.com",
+  "CLAUDE_MODEL": "claude-opus-4-8",
+  "LLM_URL": "AI_PROVIDER=openai 时填 OpenAI 兼容地址，如 https://dashscope.aliyuncs.com/compatible-mode/v1",
+  "LLM_API_KEY": "AI_PROVIDER=openai 时填对应 Key",
+  "LLM_MODEL": "qwen-plus  (或中转站支持的其它模型名)",
+
+  "TARGET_ACCOUNTS": ["aleabitoreddit"],
+
+  "CHECK_INTERVAL": 60,
+  "INITIAL_HOURS": 24,
+
+  "FEISHU_BOTS": [
+    { "note": "群备注(如 主群)", "webhook": "飞书自定义机器人 Webhook 地址", "secret": "签名密钥(可选)", "accounts": ["留空=推全部博主，或填指定博主用户名"] }
+  ],
+
+  "SITE_URL": "可选：你的看板公网地址，会作为飞书卡片按钮链接",
+  "STOCK_SCREEN": true
+}
