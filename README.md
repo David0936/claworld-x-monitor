@@ -142,6 +142,12 @@ bash build-mac.sh           # 产物：dist/Claworld Monitor.app
 
 ---
 
+## 📝 更新日志
+
+每次更新了什么都记在 [CHANGELOG.md](CHANGELOG.md)（应用内「关于」页也能看）。
+
+---
+
 ## License
 
 个人非商业使用许可（禁止商用）— 见 [LICENSE](LICENSE)。© 2026 David小鱼 / Claworld
