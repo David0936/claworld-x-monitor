@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}使用教程 · CLAWORLD{% endblock %}
+{% block content %}
+<style>
+  .tut-step { counter-increment: tut; }
+  .tut-step .card-body h5::before {
+    content: counter(tut);
+    display:inline-flex; align-items:center; justify-content:center;
+    width:26px; height:26px; margin-right:8px; border-radius:50%;
+    background:#212529; color:#fff; font-size:14px; font-weight:700; vertical-align:middle;
+  }
+  .tut-wrap { counter-reset: tut; }
+  .tut-step code { background:#f1f3f5; padding:1px 6px; border-radius:5px; }
+  .tut-step .kbd { background:#e7f1ff; color:#0d6efd; border:1px solid #b6d4fe; padding:1px 6px; border-radius:5px; font-weight:600; }
+</style>
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h4 class="mb-0">📖 使用教程</h4>
+  <a href="{{ url_for('settings') }}" class="btn btn-sm btn-dark">去设置页填写 →</a>
+</div>
+<p class="muted mb-4">四步即可跑起来：拿一个 X 数据源 Key → 设博主 → （可选）配飞书推送 → （可选）配 AI 翻译解读。所有配置都在 <a href="{{ url_for('settings') }}">设置</a> 页。</p>
+
+<div class="tut-wrap">
+
+  <!-- 1. X API -->
+  <div class="card shadow-sm mb-3 tut-step"><div class="card-body">
+    <h5 class="fw-bold">获取 X(Twitter) 数据源 API Key <span class="chip chip-a">必填</span></h5>
+    <p class="mb-2 muted">本工具不直连官方 Twitter API，而是用更便宜的第三方聚合源 <strong>twitterapi.io</strong>，按调用量计费、无需开发者审核。</p>
+    <ol class="mb-2">
+      <li>打开 <a href="https://twitterapi.io" target="_blank">https://twitterapi.io</a>，注册并登录。</li>
+      <li>在控制台（Dashboard）里找到 <strong>API Key</strong>，复制。</li>
+      <li>充值少量额度即可（按请求计费，监控几个博主很便宜）。</li>
+      <li>把 Key 粘到设置页的 <span class="kbd">TWITTER_API_KEY</span> 里保存。</li>
+    </ol>
+    <div class="muted">⚠️ 注意别和名字相近的 TwtAPI / twtapi.io 搞混，Key 不通用。</div>
+  </div></div>
+
+  <!-- 2. 博主 -->
+  <div class="card shadow-sm mb-3 tut-step"><div class="card-body">
+    <h5 class="fw-bold">设置要监控的博主 <span class="chip chip-a">必填</span></h5>
+    <p class="mb-2 muted">在设置页的 <span class="kbd">监控账号 TARGET_ACCOUNTS</span> 里填 X 用户名（@ 后面那串，不是昵称）。</p>
+    <ul class="mb-2">
+      <li>多个博主用英文逗号分隔，例如：<code>aleabitoreddit, DeItaone, unusual_whales</code></li>
+      <li>填不填 <code>@</code> 都行，系统会自动去掉。</li>
+      <li>怎么找用户名：打开博主主页，网址 <code>x.com/<b>用户名</b></code> 里的那段就是。</li>
+      <li><span class="kbd">抓取间隔</span> 建议 60 秒以上；<span class="kbd">首次回溯小时数</span> 决定第一次启动往前抓多久的推文。</li>
+    </ul>
+    <div class="muted">默认已内置博主 <a href="https://x.com/aleabitoreddit" target="_blank">@aleabitoreddit</a>，可直接试跑。改完到「实时推文」页点停止→开始即可生效。</div>
+  </div></div>
+
+  <!-- 3. 飞书 -->
+  <div class="card shadow-sm mb-3 tut-step"><div class="card-body">
+    <h5 class="fw-bold">配置飞书推送 <span class="chip chip-sub">可选</span></h5>
+    <p class="mb-2 muted">命中的推文可自动推到飞书群（支持多群、按博主分流）。</p>
+    <ol class="mb-2">
+      <li>飞书群 → 设置 → <strong>群机器人</strong> → 添加机器人 → 选「自定义机器人 Webhook」。</li>
+      <li>复制生成的 <strong>Webhook 地址</strong>；若开启了「签名校验」，把 <strong>签名密钥(Secret)</strong> 一并复制。</li>
+      <li>在设置页「飞书群」一栏新增一条：填备注、粘 Webhook、（如有）粘 Secret。</li>
+      <li><span class="kbd">指定博主</span> 留空＝该群收全部；填用户名＝只收这些博主的推文（分群路由）。</li>
+    </ol>
+    <div class="muted">想全推可加一条不填博主的群；某条想手动补推，在推文详情页点「推送到飞书」。</div>
+  </div></div>
+
+  <!-- 4. AI -->
+  <div class="card shadow-sm mb-3 tut-step"><div class="card-body">
+    <h5 class="fw-bold">配置 AI 翻译 / 中文标题 / 财经解读 <span class="chip chip-sub">可选</span></h5>
+    <p class="mb-2 muted">开启后，每条英文推文会自动生成中文标题、翻译和简要财经解读。支持两类服务，设置页一键切换：</p>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="border rounded p-3 h-100">
+          <div class="fw-bold mb-1">A · 通义千问 / OpenAI 兼容接口 <span class="chip chip-us">推荐</span></div>
+          <ul class="mb-0 small">
+            <li>提供商选 <code>openai</code>（兼容各类中转站 / 国产大模型）。</li>
+            <li><span class="kbd">LLM_URL</span>：接口地址，如通义 <code>https://dashscope.aliyuncs.com/compatible-mode/v1</code>。</li>
+            <li><span class="kbd">LLM_API_KEY</span>：对应平台的 Key。</li>
+            <li><span class="kbd">LLM_MODEL</span>：如 <code>qwen-plus</code>。</li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="border rounded p-3 h-100">
+          <div class="fw-bold mb-1">B · Claude 官方</div>
+          <ul class="mb-0 small">
+            <li>提供商选 <code>claude</code>。</li>
+            <li><span class="kbd">CLAUDE_API_KEY</span>：在 <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> 创建。</li>
+            <li><span class="kbd">CLAUDE_MODEL</span>：如 <code>claude-opus-4-8</code>。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="muted mt-2">💡 用中转站时一律选 <code>openai</code> 提供商填 LLM 那一组，别选 Claude 单选钮。不配 AI 也能跑，只是推文不带中文标题/解读。</div>
+  </div></div>
+
+</div>
+
+<div class="alert alert-light border d-flex align-items-center justify-content-between">
+  <span class="muted mb-0">填完以上，去「实时推文」页点 <strong>开始监控</strong> 就跑起来了。</span>
+  <a href="{{ url_for('settings') }}" class="btn btn-sm btn-dark">现在去设置 →</a>
+</div>
+{% endblock %}

@@ -32,17 +32,20 @@
     </a>
     <div class="navbar-nav me-auto">
       <a class="nav-link {{ 'active' if request.endpoint == 'index' }}" href="{{ url_for('index') }}">实时推文</a>
+      <a class="nav-link {{ 'active' if request.endpoint == 'settings' }}" href="{{ url_for('settings') }}">设置</a>
+      <a class="nav-link {{ 'active' if request.endpoint == 'tutorial' }}" href="{{ url_for('tutorial') }}">使用教程</a>
       <a class="nav-link {{ 'active' if request.endpoint == 'about' }}" href="{{ url_for('about') }}">关于</a>
-      {% if session.get('auth') %}<a class="nav-link {{ 'active' if request.endpoint == 'settings' }}" href="{{ url_for('settings') }}">设置</a>{% endif %}
     </div>
-    {% if session.get('auth') %}
     <span class="navbar-text text-light me-3">
       <span class="dot {{ 'dot-on' if status and status.running else 'dot-off' }}"></span>
       {{ '监控中' if status and status.running else '已停止' }}
     </span>
-    <a class="btn btn-sm btn-outline-light" href="{{ url_for('logout') }}">退出</a>
-    {% else %}
-    <a class="btn btn-sm btn-outline-light" href="{{ url_for('login') }}">管理员登录</a>
+    {% if auth_enabled %}
+      {% if session.get('auth') %}
+      <a class="btn btn-sm btn-outline-light" href="{{ url_for('logout') }}">退出</a>
+      {% else %}
+      <a class="btn btn-sm btn-outline-light" href="{{ url_for('login') }}">管理员登录</a>
+      {% endif %}
     {% endif %}
   </div>
 </nav>

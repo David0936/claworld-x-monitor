@@ -80,15 +80,29 @@
 
   <div class="col-md-6">
     <div class="card shadow-sm h-100"><div class="card-body">
-      <h6 class="mb-3">账号安全</h6>
-      <label class="form-label">设置新登录密码（留空则不改）</label>
-      <input name="NEW_PASSWORD" class="form-control mb-3" placeholder="••••••">
+      <h6 class="mb-3">登录保护</h6>
+      <div class="form-check form-switch mb-2">
+        <input class="form-check-input" type="checkbox" role="switch" id="authToggle"
+               name="AUTH_ENABLED" {{ 'checked' if cfg.AUTH_ENABLED else '' }}>
+        <label class="form-check-label" for="authToggle">启用登录密码（商用/公网部署建议开启）</label>
+      </div>
+      <label class="form-label">登录密码{% if cfg.ADMIN_PASSWORD %}（已设置，留空＝不修改）{% endif %}</label>
+      <input name="ADMIN_PASSWORD" type="password" class="form-control mb-2"
+             placeholder="{{ '••••••（已设置）' if cfg.ADMIN_PASSWORD else '自己设置一个密码' }}" autocomplete="new-password">
+      <div class="muted mb-3">不开启时任何人打开即用、无需登录；开启后信息流仍公开，但「设置」需输密码。</div>
+      <hr>
       <div class="muted">监控状态：{{ '运行中' if status.running else '已停止' }}。改完设置请到信息流页停止再开始以生效。</div>
       <hr>
-      <div class="muted">版本 <strong>v{{ version }}</strong>
-        {% if update_available %}· <a href="https://github.com/{{ github_repo }}/releases" target="_blank" class="text-danger fw-bold">🔔 发现新版 v{{ latest }}，点此下载</a>
+      <div class="muted mb-2">版本 <strong>v{{ version }}</strong>
+        {% if update_available %}· <span class="text-danger fw-bold">🔔 发现新版 v{{ latest }}</span>
         {% elif github_repo %}· 已是最新{% endif %}
       </div>
+      {% if update_available %}
+      <button type="button" id="btnUpdate" class="btn btn-sm btn-danger" onclick="doUpdate()">⬇️ 一键更新到 v{{ latest }}</button>
+      <a href="https://github.com/{{ github_repo }}/releases" target="_blank" class="btn btn-sm btn-outline-secondary">查看更新内容</a>
+      <div class="muted mt-2">同步 GitHub 最新代码并自动重启，你的配置（API Key / 博主 / 飞书等）<strong>原样保留</strong>。</div>
+      <div id="updMsg" class="small mt-2"></div>
+      {% endif %}
     </div></div>
   </div>
 </div>
@@ -121,6 +135,20 @@ function addBot(){
     +'<input type="hidden" name="bot_accounts" value="">'
     +'<div class="d-flex flex-wrap gap-2">'+boxes+'</div>';
   document.getElementById('bot-list').appendChild(row);
+}
+function doUpdate(){
+  var btn=document.getElementById('btnUpdate'), msg=document.getElementById('updMsg');
+  if(!confirm('确定同步到最新版？将拉取最新代码并自动重启，你的配置会原样保留。')) return;
+  btn.disabled=true; btn.textContent='更新中…'; msg.className='small mt-2 text-muted'; msg.textContent='正在拉取最新代码…';
+  fetch('/api/update',{method:'POST'}).then(function(r){return r.json();}).then(function(d){
+    if(!d.ok){ btn.disabled=false; btn.textContent='⬇️ 重试更新'; msg.className='small mt-2 text-danger'; msg.textContent=d.msg; return; }
+    msg.className='small mt-2 text-success'; msg.textContent=d.msg;
+    // 轮询服务重启完成后自动刷新
+    var t=0,iv=setInterval(function(){
+      t++; if(t>30){clearInterval(iv); msg.textContent='重启超时，请手动刷新页面。'; return;}
+      fetch('/api/status').then(function(r){if(r.ok){clearInterval(iv); location.reload();}}).catch(function(){});
+    },1000);
+  }).catch(function(e){ btn.disabled=false; btn.textContent='⬇️ 重试更新'; msg.className='small mt-2 text-danger'; msg.textContent='请求失败：'+e; });
 }
 </script>
 {% endblock %}

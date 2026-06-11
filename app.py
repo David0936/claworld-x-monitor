@@ -40,7 +40,7 @@ ASHARES_PATH = RESOURCE / "data" / "ashares.json"
 # 桌面模式（打包成 .app，或本地以 CLAWORLD_DESKTOP=1 运行）：本机单用户，免登录、自动管理员。
 DESKTOP = getattr(sys, "frozen", False) or os.environ.get("CLAWORLD_DESKTOP") == "1"
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 GITHUB_REPO = "David0936/Serenity-X-Monitor"    # 发布后填 "GitHub用户名/仓库名"，即启用更新检查（留空则不检查）
 _ver_cache = {"latest": "", "ts": 0.0}
 
@@ -50,14 +50,15 @@ def latest_version():
     import time as _t
     if not GITHUB_REPO:
         return ""
-    if _ver_cache["latest"] and _t.time() - _ver_cache["ts"] < 3600:
+    # 命中缓存（成功或失败都缓存 1 小时，避免每次打开设置页都阻塞重试）
+    if _t.time() - _ver_cache["ts"] < 3600:
         return _ver_cache["latest"]
     try:
-        r = requests.get(f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest", timeout=5)
+        r = requests.get(f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest", timeout=3)
         _ver_cache["latest"] = ((r.json() or {}).get("tag_name") or "").lstrip("v")
-        _ver_cache["ts"] = _t.time()
     except Exception:
         pass
+    _ver_cache["ts"] = _t.time()   # 失败也记时间戳，1 小时内不再重试
     return _ver_cache["latest"]
 
 DEFAULTS = {
@@ -69,6 +70,8 @@ DEFAULTS = {
     "LLM_URL": "https://dashscope.aliyuncs.com/compatible-mode/v1",
     "LLM_API_KEY": "",
     "LLM_MODEL": "qwen-plus",
+    "AUTH_ENABLED": False,             # 是否启用登录密码保护（商用部署可开）
+    "ADMIN_PASSWORD": "",              # 启用后的登录密码，由使用者自行设置
     "TARGET_ACCOUNTS": ["aleabitoreddit"],
     "CHECK_INTERVAL": 60,
     "INITIAL_HOURS": 24,
@@ -142,12 +145,6 @@ def ensure_secrets(cfg):
     if not cfg.get("SECRET_KEY"):
         cfg["SECRET_KEY"] = secrets.token_hex(16)
         changed = True
-    if not cfg.get("ADMIN_PASSWORD"):
-        pw = secrets.token_urlsafe(9)
-        cfg["ADMIN_PASSWORD"] = pw
-        (DATA_DIR / "default_password.txt").write_text(pw, encoding="utf-8")
-        print(f"==== 默认登录密码：{pw} （也已写入 data/default_password.txt）====")
-        changed = True
     if changed:
         save_config(cfg)
     return cfg
@@ -161,10 +158,21 @@ app = Flask(__name__,
 app.secret_key = config["SECRET_KEY"]
 
 
+def auth_on():
+    """是否开启了登录密码保护（且已设密码才真正生效，避免锁死）。"""
+    cfg = load_config()
+    return bool(cfg.get("AUTH_ENABLED") and cfg.get("ADMIN_PASSWORD"))
+
+
+@app.context_processor
+def _inject_globals():
+    return {"auth_enabled": auth_on()}
+
+
 @app.before_request
-def _desktop_auto_auth():
-    # 桌面版：本机即管理员，自动登录，免去找控制台密码
-    if DESKTOP and not session.get("auth"):
+def _auto_auth():
+    # 未开启登录保护时：直接开放管理权限，免登录即用
+    if not auth_on() and not session.get("auth"):
         session["auth"] = True
 
 
@@ -229,6 +237,8 @@ def stop_monitoring():
 # ---- 路由 ----
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    if not auth_on():            # 未开启密码保护，直接进信息流
+        return redirect(url_for("index"))
     if request.method == "POST":
         if request.form.get("password") == load_config().get("ADMIN_PASSWORD"):
             session["auth"] = True
@@ -312,8 +322,15 @@ def settings():
         cfg["FEISHU_WEBHOOK"] = ""   # 已迁移到多群 FEISHU_BOTS
         cfg["FEISHU_SECRET"] = ""
         cfg["SITE_URL"] = f.get("SITE_URL", "").strip()
-        if f.get("NEW_PASSWORD", "").strip():
-            cfg["ADMIN_PASSWORD"] = f.get("NEW_PASSWORD").strip()
+        # 登录保护：开关 + 自设密码（留空则沿用旧密码）
+        new_pw = f.get("ADMIN_PASSWORD", "").strip()
+        if new_pw:
+            cfg["ADMIN_PASSWORD"] = new_pw
+        want_auth = f.get("AUTH_ENABLED") == "on"
+        if want_auth and not cfg.get("ADMIN_PASSWORD"):
+            want_auth = False
+            flash("请先设置一个登录密码，登录保护暂未开启。")
+        cfg["AUTH_ENABLED"] = want_auth
         save_config(cfg)
         flash("已保存。重启监控后生效。")
         return redirect(url_for("settings"))
@@ -364,6 +381,51 @@ def api_status():
     return jsonify(s)
 
 
+def _git(*args, timeout=90):
+    import subprocess
+    return subprocess.run(["git", *args], cwd=str(RESOURCE),
+                          capture_output=True, text=True, timeout=timeout)
+
+
+@app.route("/api/update", methods=["POST"])
+@login_required
+def api_update():
+    """一键同步 GitHub 最新版：拉代码 → 重启。config.json/data 已 gitignore，设置不受影响。"""
+    if getattr(sys, "frozen", False):
+        return jsonify(ok=False, msg="打包版(.app)请到 GitHub Releases 下载新版替换；源码版才支持一键更新。")
+    if not (RESOURCE / ".git").exists():
+        return jsonify(ok=False, msg="当前不是 git 安装目录，无法自动更新。请用 git clone 的版本，或手动下载替换。")
+    try:
+        if _git("rev-parse", "--abbrev-ref", "HEAD").stdout.strip() in ("", "HEAD"):
+            return jsonify(ok=False, msg="当前处于游离 HEAD，请先切回分支。")
+        _git("fetch", "origin", "--tags", "--force")
+        # 优先切到最新 release tag（vX 或 X），否则跟随远端默认分支
+        latest = latest_version()
+        target = ""
+        for cand in ([f"v{latest}", latest] if latest else []):
+            if _git("rev-parse", "--verify", "--quiet", cand).returncode == 0:
+                target = cand
+                break
+        if not target:
+            branch = _git("rev-parse", "--abbrev-ref", "HEAD").stdout.strip() or "main"
+            target = f"origin/{branch}"
+        r = _git("reset", "--hard", target)
+        if r.returncode != 0:
+            return jsonify(ok=False, msg="更新失败：" + (r.stderr or r.stdout)[-300:])
+        head = _git("log", "-1", "--pretty=%h %s").stdout.strip()
+    except Exception as e:
+        return jsonify(ok=False, msg=f"更新出错：{e}")
+
+    # 延迟 1 秒重启自身以加载新代码（先把响应返回给前端）
+    def _restart():
+        import time
+        time.sleep(1.0)
+        os.execv(sys.executable, [sys.executable, *sys.argv])
+    threading.Thread(target=_restart, daemon=True).start()
+    _ver_cache["ts"] = 0.0   # 清版本缓存，重启后立即反映新版本
+    return jsonify(ok=True, msg=f"已同步到 {target}（{head}）· 正在重启，约 3 秒后请刷新页面。")
+
+
 @app.route("/api/restart", methods=["POST"])
 @login_required
 def api_restart():
@@ -371,6 +433,12 @@ def api_restart():
     stop_monitoring()
     ok, msg = start_monitoring()
     return jsonify(ok=ok, msg=("已重启 · " + msg) if ok else msg)
+
+
+@app.route("/tutorial")
+def tutorial():
+    """使用教程：X API / 博主 / 飞书 / AI 配置怎么填。"""
+    return render_template("tutorial.html", status=monitoring_status)
 
 
 # ---- 关于 / 更新日志 ----
