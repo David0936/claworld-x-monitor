@@ -71,6 +71,34 @@
         {% endfor %}
       </div>
       <button type="button" class="btn btn-sm btn-outline-primary mb-3" onclick="addBot()">+ 添加飞书群</button>
+
+      <hr>
+      <h6 class="mb-1">Telegram 推送（可选）</h6>
+      <div class="muted mb-2">找 <code>@BotFather</code> 建 bot 拿 <strong>token</strong>；把 bot 拉进群/给它发条消息后，访问 <code>api.telegram.org/bot&lt;token&gt;/getUpdates</code> 看 <strong>chat_id</strong>。</div>
+      <div id="tg-list">
+        {% for b in cfg.TELEGRAM_BOTS or [] %}
+        <div class="tg-row border rounded p-2 mb-2">
+          <div class="d-flex gap-2 mb-1">
+            <input name="tg_note" class="form-control form-control-sm" style="max-width:130px" placeholder="备注(如 个人)" value="{{ b.note }}">
+            <input name="tg_token" class="form-control form-control-sm" placeholder="Bot Token (123456:ABC...)" value="{{ b.token }}">
+            <button type="button" class="btn btn-sm btn-outline-danger flex-shrink-0" onclick="this.closest('.tg-row').remove()">×</button>
+          </div>
+          <input name="tg_chat" class="form-control form-control-sm mb-2" placeholder="chat_id（私聊=你的id / 群=负数 / 频道=@用户名）" value="{{ b.chat_id }}">
+          <div class="muted small mb-1">这个 bot 推送哪些博主（不勾=全部）：</div>
+          <input type="hidden" name="tg_accounts" value="{{ (b.accounts or [])|join(',') }}">
+          <div class="d-flex flex-wrap gap-2">
+            {% for u in cfg.TARGET_ACCOUNTS %}
+            <label class="form-check-label small border rounded px-2 py-1">
+              <input type="checkbox" class="tg-acct" value="{{ u }}" {{ 'checked' if u in (b.accounts or []) }} onchange="syncTgAccts(this)">
+              {{ ((cfg.PROFILES or {}).get(u) or {}).get('name') or u }}
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <button type="button" class="btn btn-sm btn-outline-primary mb-3" onclick="addTg()">+ 添加 Telegram bot</button>
+
       <label class="form-label">看板地址（飞书卡片按钮 / SITE_URL，可选）</label>
       <input name="SITE_URL" class="form-control mb-3" value="{{ cfg.SITE_URL }}">
       <div class="muted">A股白名单已加载 <strong>{{ screener_size }}</strong> 只；命中股票的推文会红色置顶推送。
@@ -135,6 +163,29 @@ function addBot(){
     +'<input type="hidden" name="bot_accounts" value="">'
     +'<div class="d-flex flex-wrap gap-2">'+boxes+'</div>';
   document.getElementById('bot-list').appendChild(row);
+}
+function syncTgAccts(cb){
+  var row=cb.closest('.tg-row');
+  var vals=[].slice.call(row.querySelectorAll('.tg-acct:checked')).map(function(x){return x.value;});
+  row.querySelector('input[name="tg_accounts"]').value=vals.join(',');
+}
+function addTg(){
+  var row=document.createElement('div');
+  row.className='tg-row border rounded p-2 mb-2';
+  var boxes=MON_ACCOUNTS.map(function(a){
+    return '<label class="form-check-label small border rounded px-2 py-1"><input type="checkbox" class="tg-acct" value="'+a.h+'" onchange="syncTgAccts(this)"> '+a.n+'</label>';
+  }).join('');
+  row.innerHTML=''
+    +'<div class="d-flex gap-2 mb-1">'
+    +'<input name="tg_note" class="form-control form-control-sm" style="max-width:130px" placeholder="备注(如 个人)">'
+    +'<input name="tg_token" class="form-control form-control-sm" placeholder="Bot Token (123456:ABC...)">'
+    +'<button type="button" class="btn btn-sm btn-outline-danger flex-shrink-0" onclick="this.closest(\'.tg-row\').remove()">×</button>'
+    +'</div>'
+    +'<input name="tg_chat" class="form-control form-control-sm mb-2" placeholder="chat_id（私聊=你的id / 群=负数 / 频道=@用户名）">'
+    +'<div class="muted small mb-1">这个 bot 推送哪些博主（不勾=全部）：</div>'
+    +'<input type="hidden" name="tg_accounts" value="">'
+    +'<div class="d-flex flex-wrap gap-2">'+boxes+'</div>';
+  document.getElementById('tg-list').appendChild(row);
 }
 function doUpdate(){
   var btn=document.getElementById('btnUpdate'), msg=document.getElementById('updMsg');

@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 import requests
 
 import feishu
+import telegram
 import llm
 
 LAST_TWEETS_URL = "https://api.twitterapi.io/twitter/user/last_tweets"
@@ -131,6 +132,13 @@ class Monitor:
                                       hit=hit, site_url=self.config.get("SITE_URL", ""),
                                       author=author)
             print(f"  飞书{'(命中股票)' if hit else ''}推送 {len(results)} 群：{[(n, ok) for n, ok, _ in results]}")
+            tg_bots = telegram.bots_from_config(self.config)
+            if tg_bots:
+                tg_text, _ = telegram.build_message(tweet)
+                tg_res = telegram.push_all(tg_bots, "🆕 最新推文\n\n" + tg_text,
+                                           hit=hit, site_url=self.config.get("SITE_URL", ""),
+                                           author=author)
+                print(f"  Telegram 推送 {len(tg_res)}：{[(n, ok) for n, ok, _ in tg_res]}")
 
     # ---- 主循环 ----
     def run(self):

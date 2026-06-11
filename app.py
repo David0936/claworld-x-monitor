@@ -18,6 +18,7 @@ from flask import (Flask, flash, jsonify, redirect, render_template, request,
                    session, url_for)
 
 import feishu
+import telegram
 import llm
 import stock_screen
 from monitor import Monitor
@@ -40,7 +41,7 @@ ASHARES_PATH = RESOURCE / "data" / "ashares.json"
 # 桌面模式（打包成 .app，或本地以 CLAWORLD_DESKTOP=1 运行）：本机单用户，免登录、自动管理员。
 DESKTOP = getattr(sys, "frozen", False) or os.environ.get("CLAWORLD_DESKTOP") == "1"
 
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 GITHUB_REPO = "David0936/Serenity-X-Monitor"    # 发布后填 "GitHub用户名/仓库名"，即启用更新检查（留空则不检查）
 _ver_cache = {"latest": "", "ts": 0.0}
 
@@ -78,6 +79,7 @@ DEFAULTS = {
     "FEISHU_WEBHOOK": "",
     "FEISHU_SECRET": "",
     "FEISHU_BOTS": [],          # [{note, webhook, secret, accounts}] 多飞书群，可按博主路由
+    "TELEGRAM_BOTS": [],        # [{note, token, chat_id, accounts}] 多 Telegram bot，可按博主路由
     "SITE_URL": "",
     "STOCK_SCREEN": True,
 }
@@ -321,6 +323,24 @@ def settings():
         cfg["FEISHU_BOTS"] = bots
         cfg["FEISHU_WEBHOOK"] = ""   # 已迁移到多群 FEISHU_BOTS
         cfg["FEISHU_SECRET"] = ""
+        # Telegram 机器人（多个，可按博主分流）
+        tg_notes = f.getlist("tg_note")
+        tg_tokens = f.getlist("tg_token")
+        tg_chats = f.getlist("tg_chat")
+        tg_accts = f.getlist("tg_accounts")
+        tg_bots = []
+        for i, tok in enumerate(tg_tokens):
+            tok = tok.strip()
+            chat = (tg_chats[i].strip() if i < len(tg_chats) else "")
+            if tok and chat:
+                acc_raw = (tg_accts[i] if i < len(tg_accts) else "").replace("，", ",")
+                tg_bots.append({
+                    "note": (tg_notes[i].strip() if i < len(tg_notes) else ""),
+                    "token": tok,
+                    "chat_id": chat,
+                    "accounts": [a.strip().lstrip("@") for a in acc_raw.split(",") if a.strip()],
+                })
+        cfg["TELEGRAM_BOTS"] = tg_bots
         cfg["SITE_URL"] = f.get("SITE_URL", "").strip()
         # 登录保护：开关 + 自设密码（留空则沿用旧密码）
         new_pw = f.get("ADMIN_PASSWORD", "").strip()
@@ -349,13 +369,16 @@ def api_push(tweet_id):
     t = store.get(tweet_id)
     if not t:
         return jsonify(ok=False, msg="推文不存在"), 404
+    fs_bots = feishu.bots_from_config(cfg)
+    tg_bots = telegram.bots_from_config(cfg)
+    if not fs_bots and not tg_bots:
+        return jsonify(ok=False, msg="未配置飞书群或 Telegram bot")
     title, content, hit = feishu.build_card(t)
-    bots = feishu.bots_from_config(cfg)
-    if not bots:
-        return jsonify(ok=False, msg="未配置飞书群")
-    results = feishu.push_all(bots, title, content, hit=hit, site_url=cfg.get("SITE_URL", ""))
+    results = feishu.push_all(fs_bots, title, content, hit=hit, site_url=cfg.get("SITE_URL", ""))
+    tg_text, _ = telegram.build_message(t)
+    results += telegram.push_all(tg_bots, tg_text, hit=hit, site_url=cfg.get("SITE_URL", ""))
     okn = sum(1 for _, ok, _ in results if ok)
-    return jsonify(ok=okn > 0, msg=f"已推送到 {okn}/{len(results)} 个群")
+    return jsonify(ok=okn > 0, msg=f"已推送到 {okn}/{len(results)} 个渠道")
 
 
 @app.route("/api/start", methods=["POST"])

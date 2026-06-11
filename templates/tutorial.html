@@ -58,7 +58,15 @@
       <li>在设置页「飞书群」一栏新增一条：填备注、粘 Webhook、（如有）粘 Secret。</li>
       <li><span class="kbd">指定博主</span> 留空＝该群收全部；填用户名＝只收这些博主的推文（分群路由）。</li>
     </ol>
-    <div class="muted">想全推可加一条不填博主的群；某条想手动补推，在推文详情页点「推送到飞书」。</div>
+    <div class="muted">想全推可加一条不填博主的群；某条想手动补推，在推文详情页点「推送」。</div>
+    <hr>
+    <div class="fw-bold mb-1">或用 Telegram 推送 <span class="chip chip-us">可选</span></div>
+    <ol class="mb-0 small">
+      <li>Telegram 里找 <code>@BotFather</code> → <code>/newbot</code> → 拿到 <span class="kbd">Bot Token</span>。</li>
+      <li>把 bot 拉进群、或先给它发一条消息（否则它不能主动发你）。</li>
+      <li>浏览器打开 <code>https://api.telegram.org/bot&lt;你的token&gt;/getUpdates</code>，找 <code>"chat":{"id": ...}</code> 里的 <span class="kbd">chat_id</span>（私聊=你的 id，群=负数，频道=@用户名）。</li>
+      <li>设置页「Telegram 推送」里新增一条，填 token + chat_id 即可，同样支持按博主分流。</li>
+    </ol>
   </div></div>
 
   <!-- 4. AI -->

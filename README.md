@@ -5,6 +5,8 @@
 [![License](https://img.shields.io/badge/license-个人免费自用-orange)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/David0936/Serenity-X-Monitor?style=social)](https://github.com/David0936/Serenity-X-Monitor)
 
+**简体中文** | [English](README.en.md)
+
 自部署的 X(Twitter) 财经博主监控系统：**多账号实时监控 → AI 翻译 / 中文标题 / 财经解读 → 推文秒筛股票（A股 + 美股）→ 飞书推送 + Web 后台**。
 
 为「盯财经博主、第一时间抓到股票线索」而做：博主一发推，几十秒内飞书弹卡片，点名的 A股 / 美股自动红色置顶。
@@ -73,7 +75,7 @@
 pip3 install -r requirements.txt
 python3 start.py            # http://localhost:5001
 ```
-首次启动控制台会打印**默认登录密码**（也写入 `data/default_password.txt`）；登录后到**设置**页填写各项。
+**默认免登录、开箱即用**，打开后直接到**设置**页填写各项。需要登录保护时（如公网/商用部署），在「设置 → 登录保护」里自行开启并设密码。
 
 ### 方式四：让 AI Agent 帮你装（Skill）
 把 `skill/claworld-monitor` 文件夹拷到 `~/.claude/skills/`，然后对 Claude Code 说「帮我部署 Claworld 财经监控」，Agent 会带你 clone、装依赖、配 API、跑起来（Mac/Win/Linux 通用）。
@@ -111,10 +113,12 @@ bash build-mac.sh           # 产物：dist/Claworld Monitor.app
 
 > 提示：若用「中转站」即使它代理的是 Claude 模型，也要选 **openai/兼容** 这条（Claude 单选钮走的是 Anthropic 官方地址）。
 
-### 3) 飞书推送（可选，免费）
-- 飞书群 → 群设置 → **群机器人** → 添加机器人 → **自定义机器人** → 复制 **Webhook 地址**
-- 设置页「飞书推送」点「+ 添加飞书群」→ 填备注 + 粘 Webhook（安全设置选「签名校验」的话把密钥也填上）
-- 可加多个群；每个群能**勾选只推哪些博主**（不勾=全部）
+### 3) 飞书 / Telegram 推送（可选，免费）
+**飞书**：群设置 → **群机器人** → 添加 **自定义机器人** → 复制 **Webhook 地址** → 设置页「飞书推送」点「+ 添加飞书群」填备注 + Webhook（开了签名校验就把密钥也填上）。
+
+**Telegram**：找 `@BotFather` 发 `/newbot` 拿 **Bot Token** → 把 bot 拉进群或先给它发条消息 → 打开 `https://api.telegram.org/bot<token>/getUpdates` 找 **chat_id** → 设置页「Telegram 推送」填 token + chat_id。
+
+两者都可加多个、且能**勾选只推哪些博主**（不勾=全部）；命中股票自动红色置顶。
 
 ---
 
@@ -135,6 +139,7 @@ bash build-mac.sh           # 产物：dist/Claworld Monitor.app
 | `llm.py` | AI 层：Claude / OpenAI 兼容(通义千问) 可切换 |
 | `stock_screen.py` | 股票秒筛（A股代码/名称 + 美股 $ticker） |
 | `feishu.py` | 飞书卡片推送（多群 + 按博主路由） |
+| `telegram.py` | Telegram Bot 推送（多 bot + 按博主路由） |
 | `store.py` | 推文存储 + 去重 |
 | `data/ashares.json` | A股名录 |
 | `scripts/build-ashares.py` | 重建名录 |
