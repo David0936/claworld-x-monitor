@@ -153,4 +153,8 @@ Every change is logged in [CHANGELOG.md](CHANGELOG.md) (also visible on the in-a
 
 ## License
 
-Personal, non-commercial use license (commercial use prohibited) — see [LICENSE](LICENSE). © 2026 David小鱼 / Claworld
+**MIT License** — see [LICENSE](LICENSE). **Use, modify, redistribute and sell freely; commercial use needs no permission.** X and AI APIs are paid services with setup overhead, so you're welcome to self-host and open it up to others or charge them to join.
+
+🌐 Part of the **Claworld** ecosystem — more projects at <https://github.com/David0936>.
+
+> ⚠️ Information aggregation only, **not financial advice**, use at your own risk (see the financial disclaimer in LICENSE). © 2026 David小鱼 / Claworld

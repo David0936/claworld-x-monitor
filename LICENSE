@@ -1,42 +1,32 @@
-Claworld Monitor — 个人非商业使用许可 (Personal, Non-Commercial Use License)
-版权所有 © 2026 David小鱼 (Claworld) · 保留所有权利
+MIT License
+
+Copyright (c) 2026 David小鱼 (Claworld)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
 ────────────────────────────────────────────────────────
-中文
+⚠️ 财经免责声明 / Financial Disclaimer
 ────────────────────────────────────────────────────────
+本软件仅对公开社交媒体内容做信息聚合、翻译与提醒，不构成任何投资建议，
+不对任何股票、基金、加密货币等资产做推荐或背书。软件中出现的股票代码/名称仅为对
+被监控公开账号言论的客观标注。是否买卖风险自负，请独立判断。使用者须遵守所在地
+法律法规及数据源 / AI / 第三方服务条款。
 
-【允许】
-- 个人学习、研究、自部署自用；
-- 在保留本许可与作者署名的前提下，自由修改、二次开发（限非商业）。
-
-【禁止（未经作者书面授权）】
-- 任何形式的商业使用：出售本软件、以本软件或其衍生版提供付费服务 /
-  付费订阅 / 付费社群、二手转卖、捆绑销售等；
-- 移除或篡改作者信息与本许可声明。
-
-【⚠️ 财经免责声明 — 重要】
-- 本软件仅对**公开**社交媒体内容做信息聚合、翻译与提醒，**不构成任何投资建议**，
-  **不对任何股票、基金、加密货币等资产做推荐或背书**。
-- 软件中出现的股票代码 / 名称仅为对被监控公开账号言论的客观标注，
-  不代表作者或本软件的任何观点或操作建议。
-- 是否买卖、何时买卖，风险与后果完全由使用者自行承担，请独立判断、自行风控。
-- 财经信息可能存在延迟、遗漏或错误；作者不对因使用本软件产生的任何
-  直接或间接损失负责。
-
-【合规】
-- 使用者须遵守所在地法律法规，以及数据源（如 X / twitterapi.io）、
-  AI 服务商、飞书等第三方的服务条款；
-- 不得用本软件抓取、二次分发受版权保护或付费墙保护的内容（如付费订阅内容），
-  不得用于侵犯他人合法权益。
-
-本软件按"现状(AS IS)"提供，不附带任何明示或默示的担保。
-
-────────────────────────────────────────────────────────
-English (summary)
-────────────────────────────────────────────────────────
-Free for personal, non-commercial use and modification, with attribution.
-Commercial use of any kind is prohibited without the author's written permission.
 NOT FINANCIAL ADVICE: this tool only aggregates PUBLIC social-media posts; it does
-not recommend any security and gives no investment advice. Use at your own risk;
-the author is not liable for any losses. Comply with all applicable laws and the
-terms of service of data/AI/third-party providers. Provided "AS IS", no warranty.
+not recommend any security and gives no investment advice. Use at your own risk.

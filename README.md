@@ -165,4 +165,9 @@ bash build-mac.sh           # 产物：dist/Claworld Monitor.app
 
 ## License
 
-个人非商业使用许可（禁止商用）— 见 [LICENSE](LICENSE)。© 2026 David小鱼 / Claworld
+**MIT 协议** — 见 [LICENSE](LICENSE)。**随便用、随便改、随便分发，商用也无需授权。**
+X 与 AI 接口均为付费服务、部署也有门槛，你完全可以自部署后开通给他人使用或收费让别人加入。
+
+🌐 本产品属于 **Claworld 生态圈**，更多产品请访问 <https://github.com/David0936>。
+
+> ⚠️ 仅信息聚合提示，**不构成投资建议**，风险自负（详见 LICENSE 财经免责声明）。 © 2026 David小鱼 / Claworld
