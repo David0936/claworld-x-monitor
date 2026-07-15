@@ -11,3 +11,10 @@ venv/
 build/
 dist/
 *.spec
+
+# Next.js / Vercel
+node_modules/
+.next/
+.vercel/
+.env
+.env.local

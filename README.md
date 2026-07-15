@@ -1,4 +1,26 @@
-# 📈 Claworld Monitor — X(Twitter) 财经监控 + 股票秒筛
+# 📈 Claworld 投资雷达 — AI 产业投资机会日报
+
+> **Web 2.0 已上线：** [claworld-invest-radar.vercel.app](https://claworld-invest-radar.vercel.app/daily)
+
+现在项目包含一套面向 Vercel 的日报网站：每天北京时间 08:00 聚合指定财经博主的公开帖子，由 AI 去重并提炼为「市场脉搏、产业分类、投资逻辑、关联标的、反向风险、原帖溯源」，自动进入日期归档。原有 Python 本地实时监控、飞书 / Telegram 推送能力继续保留。
+
+### Vercel 环境变量
+
+| 变量 | 用途 |
+|---|---|
+| `TWITTER_API_KEY` | twitterapi.io 数据密钥 |
+| `TARGET_ACCOUNTS` | 监控账号，英文逗号分隔，不写 `@` |
+| `LLM_API_KEY` | OpenAI 兼容模型密钥 |
+| `LLM_BASE_URL` | 兼容接口地址，默认 `https://api.openai.com/v1` |
+| `LLM_MODEL` | 模型名，默认 `gpt-4.1-mini` |
+| `BLOB_READ_WRITE_TOKEN` | Vercel Blob 日报归档，创建并连接 Blob 后自动注入 |
+| `CRON_SECRET` | 保护日报生成接口；Vercel Cron 会自动携带 |
+
+Web 版代码位于 `app/`、`components/` 与 `lib/`。本地预览使用 `npm install && npm run dev`；未接入密钥时会显示明确标注的结构预览，不会伪造实时投资线索。
+
+---
+
+## 原有本地实时监控器
 
 [![Release](https://img.shields.io/github/v/release/David0936/Serenity-X-Monitor?label=version&color=brightgreen)](https://github.com/David0936/Serenity-X-Monitor/releases/latest)
 [![Changelog](https://img.shields.io/badge/changelog-更新日志-blue)](CHANGELOG.md)

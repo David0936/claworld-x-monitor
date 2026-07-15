@@ -1,0 +1,74 @@
+{
+  "date": "2026-07-15",
+  "generatedAt": "2026-07-15T00:00:00.000Z",
+  "status": "preview",
+  "title": "资金在寻找 AI 应用兑现与算力增量的交集",
+  "summary": "这是上线前的结构预览。接入 X 与模型密钥后，系统会在每天北京时间 08:00 自动聚合指定财经博主的公开观点，识别相关公司与产业链，并生成可追溯的投资线索日报。",
+  "marketPulse": "今日尚未接入实时数据。以下内容仅用于展示分析维度与阅读体验，不代表真实市场观点。",
+  "stats": { "sources": 0, "posts": 0, "opportunities": 3, "tickers": 0 },
+  "categories": [
+    {
+      "key": "compute",
+      "name": "算力与基础设施",
+      "description": "芯片、数据中心、电力、光模块与云基础设施",
+      "items": [
+        {
+          "id": "preview-compute",
+          "title": "算力线索将从 GPU 扩散到电力与互连环节",
+          "summary": "系统会交叉提取博主提到的供需变化、订单、价格与产能信息，并标注关联产业链。",
+          "thesis": "重点区分可验证的订单增量与只有叙事变化的主题行情。",
+          "impact": "待验证",
+          "confidence": "低",
+          "horizon": "中期",
+          "tickers": [],
+          "risk": "示例内容，无实时数据支撑。",
+          "source": "等待接入数据",
+          "sourceUrl": "https://x.com",
+          "author": "system"
+        }
+      ]
+    },
+    {
+      "key": "applications",
+      "name": "应用与商业化",
+      "description": "收入、用户增长、降本增效与新商业模式",
+      "items": [
+        {
+          "id": "preview-app",
+          "title": "应用层关注点从能力展示转向收入兑现",
+          "summary": "日报会把产品发布与可量化的用户、付费、毛利变化分开呈现。",
+          "thesis": "能够进入现有高频工作流、形成持续付费的产品更值得跟踪。",
+          "impact": "待验证",
+          "confidence": "低",
+          "horizon": "长期",
+          "tickers": [],
+          "risk": "示例内容，无实时数据支撑。",
+          "source": "等待接入数据",
+          "sourceUrl": "https://x.com",
+          "author": "system"
+        }
+      ]
+    },
+    {
+      "key": "risk",
+      "name": "风险与反向信号",
+      "description": "估值、监管、竞争、供应与预期差",
+      "items": [
+        {
+          "id": "preview-risk",
+          "title": "每条机会必须同时给出反证与风险",
+          "summary": "系统不会只提炼利好，也会保留原始来源并明确置信度与验证条件。",
+          "thesis": "投资线索的价值来自可证伪，而不是更响亮的结论。",
+          "impact": "中性",
+          "confidence": "高",
+          "horizon": "短期",
+          "tickers": [],
+          "risk": "AI 摘要可能遗漏语境，必须回看原文并独立判断。",
+          "source": "产品原则",
+          "sourceUrl": "https://x.com",
+          "author": "system"
+        }
+      ]
+    }
+  ]
+}
