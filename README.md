@@ -1,8 +1,8 @@
 # 📈 Claworld 投资雷达 — AI 产业投资机会日报
 
-> **Web 2.0 已上线：** [claworld-invest-radar.vercel.app](https://claworld-invest-radar.vercel.app/daily)
+> **Web 2.1 已上线：** [claworld-invest-radar.vercel.app](https://claworld-invest-radar.vercel.app/news)
 
-现在项目包含一套面向 Vercel 的日报网站：每天北京时间 08:00 聚合指定财经博主的公开帖子，由 AI 去重并提炼为「市场脉搏、产业分类、投资逻辑、关联标的、反向风险、原帖溯源」，自动进入日期归档。原有 Python 本地实时监控、飞书 / Telegram 推送能力继续保留。
+网站首页升级为 AI 产业新闻雷达，左侧包含「AI 产业新闻、美国政府新闻、华尔街机构新闻、全球 AI 产业链、微盘股动态」五个频道，主区显示美股 / 韩股新闻情绪、关联股票和原始来源。免费阶段直接读取公司官网、美国监管 RSS 与指定 X 账号；付费新闻 API 已预留扩展位置但默认不产生费用。每天北京时间 08:00 还会生成 AI 投资简报并自动归档。原有 Python 本地实时监控、飞书 / Telegram 推送能力继续保留。
 
 ### Vercel 环境变量
 
@@ -15,6 +15,7 @@
 | `LLM_MODEL` | 模型名，默认 `gpt-4.1-mini` |
 | `BLOB_READ_WRITE_TOKEN` | Vercel Blob 日报归档，创建并连接 Blob 后自动注入 |
 | `CRON_SECRET` | 保护日报生成接口；Vercel Cron 会自动携带 |
+| `AI_X_ACCOUNTS` 等 | 按频道配置 X 账号，英文逗号分隔 |
 
 Web 版代码位于 `app/`、`components/` 与 `lib/`。本地预览使用 `npm install && npm run dev`；未接入密钥时会显示明确标注的结构预览，不会伪造实时投资线索。
 

@@ -42,3 +42,20 @@ export type DailyBriefing = {
   };
   categories: Category[];
 };
+
+export type NewsChannelKey = "ai" | "government" | "wallstreet" | "supply-chain" | "microcap";
+export type NewsMarket = "美股" | "韩股" | "全球";
+
+export type NewsItem = {
+  id: string;
+  channel: NewsChannelKey;
+  title: string;
+  summary: string;
+  url: string;
+  source: string;
+  publishedAt: string;
+  market: NewsMarket;
+  sentiment: "偏多" | "偏空" | "中性";
+  symbols: string[];
+  sourceType: "官网" | "监管" | "X";
+};

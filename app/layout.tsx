@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Claworld 投资雷达｜AI 产业投资机会日报",
-  description: "聚合财经博主公开观点，提炼 AI 产业链投资线索、影响标的与反向风险。",
+  title: "Claworld 新闻雷达｜AI 产业美股韩股情绪与催化",
+  description: "聚合 AI 产业、美国政府、华尔街机构、全球供应链与微盘股动态，追踪美股韩股新闻情绪。",
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://claworld-x-monitor.vercel.app"),
   openGraph: {
     title: "Claworld 投资雷达",
-    description: "每天 08:00 更新的 AI 产业投资机会日报",
+    description: "AI 产业美股韩股情绪、新闻与催化雷达",
     type: "website",
     locale: "zh_CN",
   },
