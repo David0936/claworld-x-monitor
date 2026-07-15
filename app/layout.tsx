@@ -10,7 +10,9 @@ export const metadata: Metadata = {
     description: "AI 产业美股韩股情绪、新闻与催化雷达",
     type: "website",
     locale: "zh_CN",
+    images: [{ url: "/brand/logo-light.png", width: 1200, height: 169, alt: "Claworld" }],
   },
+  icons: { icon: "/brand/logo-light.png" },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

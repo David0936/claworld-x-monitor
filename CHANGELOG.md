@@ -2,6 +2,25 @@
 
 本项目版本遵循 `主.次.修订`（语义化版本）。
 
+## v2.2.0 — 2026-07-15
+
+- 使用 Claworld 官方 Logo，升级为红色暗色编辑部视觉体系
+- 新闻首页升级为按日期与分钟排列的产业时间线
+- 新增分类主题、Agent 接入、关于我、更新日志与反馈页面
+- 开放公开只读的 RSS、News REST API、Daily REST API 与 Agent Skill
+- 保留 AI 日报、日期归档、美股/韩股情绪与五大新闻频道
+
+## v2.1.0 — 2026-07-15
+
+- 新增 AI 产业、美国政府、华尔街机构、全球 AI 产业链与微盘股频道
+- 接入 White House、SEC、FTC、Google AI、NVIDIA、AMD、Samsung、SK hynix 等免费官方源
+- 新增美股、韩股新闻情绪与关联股票标签
+
+## v2.0.0 — 2026-07-15
+
+- 新增 Vercel Web 版 AI 投资日报
+- 新增 Vercel Blob 历史日报归档和北京时间 08:00 定时生成
+
 ## v1.2.0 — 2026-06-11
 - 📨 新增 **Telegram 推送**：找 @BotFather 建 bot，填 token + chat_id 即可；和飞书一样支持多 bot、按博主分流、命中股票红色标注（设置页「Telegram 推送」）
 - 🌐 新增**英文 README**（`README.en.md`）+ 中英互切链接

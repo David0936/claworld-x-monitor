@@ -1,4 +1,4 @@
-import { Header } from "@/components/header";
+import { AppShell } from "@/components/app-shell";
 import { NewsRadar } from "@/components/news-radar";
 import { CHANNELS, getNews } from "@/lib/news";
 import type { NewsChannelKey, NewsMarket } from "@/lib/types";
@@ -10,5 +10,5 @@ export default async function NewsPage({ searchParams }: { searchParams: Promise
   const active: NewsChannelKey | "all" = CHANNELS.some((channel) => channel.key === params.channel) ? params.channel as NewsChannelKey : "all";
   const market: NewsMarket | "全部" = ["美股", "韩股", "全球"].includes(params.market || "") ? params.market as NewsMarket : "全部";
   const items = await getNews();
-  return <><Header /><NewsRadar items={items} active={active} market={market} /></>;
+  return <AppShell><NewsRadar items={items} active={active} market={market} /></AppShell>;
 }
